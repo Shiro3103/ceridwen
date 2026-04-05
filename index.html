@@ -13,31 +13,46 @@ body {
   overflow:hidden;
 }
 
-/* 🌌 Particle background */
+/* 🌌 พื้นหลัง */
 canvas {
   position:fixed;
   top:0;
   left:0;
-  z-index:-1;
+  z-index:-2;
 }
 
-/* 🧠 โลโก้ */
+/* 🔮 โลโก้ด้านหลัง */
+.bg-logo {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:120px;
+  font-weight:bold;
+  color:rgba(255,255,255,0.05);
+  z-index:-1;
+
+  animation: float 6s ease-in-out infinite,
+             glowPulse 3s infinite alternate;
+}
+
+@keyframes float {
+  0% { transform:translate(-50%,-50%) translateY(0); }
+  50% { transform:translate(-50%,-50%) translateY(-20px); }
+  100% { transform:translate(-50%,-50%) translateY(0); }
+}
+
+@keyframes glowPulse {
+  from { text-shadow:0 0 20px rgba(138,43,226,0.3); }
+  to { text-shadow:0 0 60px rgba(138,43,226,0.8); }
+}
+
+/* 🧠 โลโก้ด้านหน้า */
 .logo {
   text-align:center;
   font-size:50px;
   margin-top:40px;
-  animation: float 3s ease-in-out infinite, glow 2s infinite alternate;
-}
-
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
-}
-
-@keyframes glow {
-  from { text-shadow:0 0 10px #fff; }
-  to { text-shadow:0 0 30px #8a2be2; }
+  text-shadow:0 0 20px white;
 }
 
 /* 🧑‍🤝‍🧑 การ์ด */
@@ -84,32 +99,31 @@ button {
   position:fixed;
   top:50%;
   left:50%;
-  transform:translate(-50%, -50%) scale(0);
+  transform:translate(-50%,-50%) scale(0);
   background:#111;
   padding:30px;
   border-radius:20px;
   text-align:center;
   transition:0.3s;
   z-index:10;
-  box-shadow:0 0 30px #8a2be2;
+  box-shadow:0 0 40px purple;
 }
 
 .popup img {
   width:100px;
   border-radius:50%;
-  margin-bottom:10px;
 }
 
 .popup.active {
-  transform:translate(-50%, -50%) scale(1);
+  transform:translate(-50%,-50%) scale(1);
 }
 
 /* ✨ เมาส์ glow */
 .cursor {
   position:fixed;
-  width:100px;
-  height:100px;
-  background:radial-gradient(circle, rgba(138,43,226,0.5), transparent);
+  width:120px;
+  height:120px;
+  background:radial-gradient(circle, rgba(138,43,226,0.4), transparent);
   pointer-events:none;
   border-radius:50%;
   transform:translate(-50%, -50%);
@@ -120,6 +134,9 @@ button {
 <body>
 
 <canvas id="bg"></canvas>
+
+<!-- 🔮 โลโก้ข้างหลัง -->
+<div class="bg-logo">CERIDWEN</div>
 
 <div class="cursor" id="cursor"></div>
 
@@ -147,7 +164,7 @@ button {
 
 </div>
 
-<!-- 📦 Popup -->
+<!-- 📦 popup -->
 <div id="popup" class="popup" onclick="closeProfile()"></div>
 
 <!-- 🔊 เพลง -->
@@ -157,7 +174,7 @@ button {
 
 <script>
 
-/* 🎵 เล่นเพลงเนียน */
+/* 🎵 เพลง */
 document.body.addEventListener("click", () => {
   document.getElementById("bgmusic").play();
 });
@@ -178,7 +195,7 @@ function closeProfile() {
   document.getElementById("popup").classList.remove("active");
 }
 
-/* ✨ เมาส์ glow */
+/* ✨ เมาส์ */
 const cursor = document.getElementById("cursor");
 document.addEventListener("mousemove", e => {
   cursor.style.left = e.clientX + "px";
@@ -194,7 +211,7 @@ canvas.height = window.innerHeight;
 
 let particles = [];
 
-for(let i=0;i<100;i++){
+for(let i=0;i<120;i++){
   particles.push({
     x:Math.random()*canvas.width,
     y:Math.random()*canvas.height,
