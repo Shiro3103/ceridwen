@@ -7,7 +7,7 @@
 <style>
 body {
   margin:0;
-  font-family: Arial;
+  font-family:Arial;
   background:black;
   color:white;
   overflow:hidden;
@@ -21,37 +21,31 @@ canvas {
   z-index:-2;
 }
 
-/* 🔮 โลโก้ด้านหลัง */
+/* 🔮 โลโก้ */
 .bg-logo {
   position:fixed;
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
   font-size:120px;
-  font-weight:bold;
   color:rgba(255,255,255,0.05);
   z-index:-1;
-
-  animation: float 6s ease-in-out infinite,
-             glowPulse 3s infinite alternate;
+  animation: float 6s infinite, glow 3s infinite alternate;
 }
 
 @keyframes float {
-  0% { transform:translate(-50%,-50%) translateY(0); }
-  50% { transform:translate(-50%,-50%) translateY(-20px); }
-  100% { transform:translate(-50%,-50%) translateY(0); }
+  50% { transform:translate(-50%,-60%); }
 }
 
-@keyframes glowPulse {
-  from { text-shadow:0 0 20px rgba(138,43,226,0.3); }
-  to { text-shadow:0 0 60px rgba(138,43,226,0.8); }
+@keyframes glow {
+  from { text-shadow:0 0 20px purple; }
+  to { text-shadow:0 0 60px purple; }
 }
 
-/* 🧠 โลโก้ด้านหน้า */
 .logo {
   text-align:center;
+  margin-top:30px;
   font-size:50px;
-  margin-top:40px;
   text-shadow:0 0 20px white;
 }
 
@@ -59,8 +53,9 @@ canvas {
 .container {
   display:flex;
   justify-content:center;
-  gap:40px;
-  margin-top:50px;
+  flex-wrap:wrap;
+  gap:30px;
+  margin-top:40px;
 }
 
 .card {
@@ -68,12 +63,14 @@ canvas {
   padding:20px;
   border-radius:20px;
   text-align:center;
-  width:150px;
+  width:160px;
   transition:0.3s;
+  box-shadow:0 0 20px rgba(138,43,226,0.3);
 }
 
 .card:hover {
-  transform:scale(1.1);
+  transform:translateY(-10px) scale(1.05);
+  box-shadow:0 0 40px purple;
 }
 
 .card img {
@@ -82,17 +79,14 @@ canvas {
 }
 
 button {
-  margin-top:10px;
-  padding:5px 10px;
+  margin-top:8px;
+  padding:6px 10px;
   border:none;
   border-radius:10px;
   cursor:pointer;
 }
 
-.fb {
-  background:#1877f2;
-  color:white;
-}
+.fb { background:#1877f2; color:white; }
 
 /* 📦 popup */
 .popup {
@@ -109,24 +103,26 @@ button {
   box-shadow:0 0 40px purple;
 }
 
-.popup img {
-  width:100px;
-  border-radius:50%;
-}
-
 .popup.active {
   transform:translate(-50%,-50%) scale(1);
 }
 
-/* ✨ เมาส์ glow */
+/* 👻 ปุ่มแอดมิน */
+.admin-btn {
+  position:fixed;
+  top:10px;
+  left:10px;
+  opacity:0;
+}
+
+/* ✨ เมาส์ */
 .cursor {
   position:fixed;
   width:120px;
   height:120px;
   background:radial-gradient(circle, rgba(138,43,226,0.4), transparent);
-  pointer-events:none;
   border-radius:50%;
-  transform:translate(-50%, -50%);
+  pointer-events:none;
 }
 </style>
 </head>
@@ -134,110 +130,124 @@ button {
 <body>
 
 <canvas id="bg"></canvas>
-
-<!-- 🔮 โลโก้ข้างหลัง -->
 <div class="bg-logo">CERIDWEN</div>
-
 <div class="cursor" id="cursor"></div>
 
 <h1 class="logo">CERIDWEN</h1>
 
-<div class="container">
+<div class="container" id="members"></div>
 
-  <div class="card">
-    <img src="https://i.pravatar.cc/100?img=1">
-    <h3>Bank</h3>
-    <button onclick="openProfile('Bank','Leader','นักรบแห่ง CERIDWEN','https://i.pravatar.cc/100?img=1')">โปรไฟล์</button>
-    <a href="https://facebook.com" target="_blank">
-      <button class="fb">Facebook</button>
-    </a>
-  </div>
+<div id="popup" class="popup" onclick="this.classList.remove('active')"></div>
 
-  <div class="card">
-    <img src="https://i.pravatar.cc/100?img=2">
-    <h3>Mix</h3>
-    <button onclick="openProfile('Mix','Support','สายซัพโคตรโหด','https://i.pravatar.cc/100?img=2')">โปรไฟล์</button>
-    <a href="https://facebook.com" target="_blank">
-      <button class="fb">Facebook</button>
-    </a>
-  </div>
+<button class="admin-btn" onclick="adminLogin()">⚙️</button>
 
-</div>
-
-<!-- 📦 popup -->
-<div id="popup" class="popup" onclick="closeProfile()"></div>
-
-<!-- 🔊 เพลง -->
 <audio id="bgmusic" autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
 
-<script>
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🎵 เพลง */
-document.body.addEventListener("click", () => {
-  document.getElementById("bgmusic").play();
-});
+const firebaseConfig = {
+  apiKey: "AIzaSyCr42iK2m6dwxqO2ZEFTIicDSWawb8m5ck",
+  authDomain: "ceridwen-7701e.firebaseapp.com",
+  projectId: "ceridwen-7701e",
+  storageBucket: "ceridwen-7701e.firebasestorage.app",
+  messagingSenderId: "1016625949342",
+  appId: "1:1016625949342:web:e11a12029ffae769f1298f"
+};
 
-/* 📦 popup */
-function openProfile(name, role, desc, img) {
-  const popup = document.getElementById("popup");
-  popup.innerHTML = `
-    <img src="${img}">
-    <h2>${name}</h2>
-    <p>${role}</p>
-    <p>${desc}</p>
-  `;
-  popup.classList.add("active");
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-function closeProfile() {
-  document.getElementById("popup").classList.remove("active");
-}
+/* โหลดสมาชิก */
+async function loadMembers(){
+  const querySnapshot = await getDocs(collection(db, "members"));
+  const container = document.getElementById("members");
+  container.innerHTML="";
 
-/* ✨ เมาส์ */
-const cursor = document.getElementById("cursor");
-document.addEventListener("mousemove", e => {
-  cursor.style.left = e.clientX + "px";
-  cursor.style.top = e.clientY + "px";
-});
-
-/* 🌌 particle */
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particles = [];
-
-for(let i=0;i<120;i++){
-  particles.push({
-    x:Math.random()*canvas.width,
-    y:Math.random()*canvas.height,
-    r:Math.random()*2,
-    dx:Math.random()-0.5,
-    dy:Math.random()-0.5
+  querySnapshot.forEach(doc=>{
+    const m = doc.data();
+    container.innerHTML += `
+    <div class="card">
+      <img src="${m.img}">
+      <h3>${m.name}</h3>
+      <button onclick="show('${m.name}','${m.role}','${m.desc}','${m.img}')">โปรไฟล์</button>
+      <a href="${m.fb}" target="_blank">
+        <button class="fb">Facebook</button>
+      </a>
+    </div>`;
   });
 }
 
-function animate(){
+loadMembers();
+
+/* เพิ่มสมาชิก */
+window.adminLogin = async function(){
+  const pass = prompt("รหัสแอดมิน:");
+  if(pass === "1234"){  // 🔐 เปลี่ยนรหัสตรงนี้ได้
+    const name = prompt("ชื่อ:");
+    const role = prompt("ตำแหน่ง:");
+    const desc = prompt("คำอธิบาย:");
+    const img = prompt("ลิงก์รูป:");
+    const fb = prompt("ลิงก์ Facebook:");
+
+    await addDoc(collection(db,"members"),{
+      name, role, desc, img, fb
+    });
+
+    alert("เพิ่มแล้ว!");
+    loadMembers();
+  }
+}
+
+/* popup */
+window.show = function(name,role,desc,img){
+  const p = document.getElementById("popup");
+  p.innerHTML = `
+    <img src="${img}" width="100">
+    <h2>${name}</h2>
+    <p>${role}</p>
+    <p>${desc}</p>`;
+  p.classList.add("active");
+}
+
+/* เมาส์ */
+const cursor = document.getElementById("cursor");
+document.addEventListener("mousemove",e=>{
+  cursor.style.left=e.clientX+"px";
+  cursor.style.top=e.clientY+"px";
+});
+
+/* particle */
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let p=[];
+for(let i=0;i<100;i++){
+  p.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*2});
+}
+
+function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  particles.forEach(p=>{
-    p.x+=p.dx;
-    p.y+=p.dy;
-
+  p.forEach(i=>{
+    i.y+=0.2;
+    if(i.y>canvas.height) i.y=0;
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.arc(i.x,i.y,i.r,0,Math.PI*2);
     ctx.fillStyle="white";
     ctx.fill();
   });
-
-  requestAnimationFrame(animate);
+  requestAnimationFrame(draw);
 }
+draw();
 
-animate();
+/* เพลง */
+document.body.onclick=()=>document.getElementById("bgmusic").play();
 
 </script>
 
