@@ -216,18 +216,28 @@ onSnapshot(collection(db,"members"),snap=>{
 /* render */
 function render(arr){
   list.innerHTML="";
+
   arr.forEach(u=>{
     let r="member";
-    if(u.rank==="THEBOSS") r="theboss";
-    if(u.rank==="SUP/BY") r="supby";
+
+    if(u.role==="THEBOSS") r="theboss";
+    if(u.role==="SUP/BY") r="supby";
 
     list.innerHTML+=`
     <div class="card">
-      <img src="${u.image||'https://via.placeholder.com/80'}" class="avatar">
-      <div class="rank ${r}">${u.rank||'MEMBER'}</div>
+      <img src="${u.image || 'https://via.placeholder.com/80'}">
+
+      <div class="rank ${r}">
+        ${u.role || "MEMBER"}
+      </div>
+
       <h3>${u.name}</h3>
-      <a class="fb" href="${u.facebook}" target="_blank">Facebook</a>
-    </div>`;
+
+      <a class="fb" href="${u.facebook}" target="_blank">
+        Facebook
+      </a>
+    </div>
+    `;
   });
 }
 
