@@ -6,122 +6,132 @@
 
 <style>
 body {
-  margin: 0;
+  margin:0;
   font-family: Arial;
-  background: radial-gradient(circle at top, #0a0a0a, #000);
-  color: white;
-  text-align: center;
-  overflow-x: hidden;
+  background:black;
+  color:white;
+  overflow:hidden;
 }
 
-/* BACKGROUND ANIMATION */
-body::before {
-  content: "";
-  position: fixed;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(108,76,255,0.2), transparent 70%);
-  animation: move 10s linear infinite;
-}
-@keyframes move {
-  0% { transform: translate(-25%, -25%); }
-  50% { transform: translate(-10%, -10%); }
-  100% { transform: translate(-25%, -25%); }
+/* 🌌 Particle background */
+canvas {
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:-1;
 }
 
-/* TITLE */
-h1 {
-  margin-top: 50px;
-  font-size: 60px;
-  letter-spacing: 8px;
-  animation: glow 2s infinite alternate;
+/* 🧠 โลโก้ */
+.logo {
+  text-align:center;
+  font-size:50px;
+  margin-top:40px;
+  animation: float 3s ease-in-out infinite, glow 2s infinite alternate;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
 }
 
 @keyframes glow {
-  from { text-shadow: 0 0 10px #fff; }
-  to { text-shadow: 0 0 25px #6c4cff; }
+  from { text-shadow:0 0 10px #fff; }
+  to { text-shadow:0 0 30px #8a2be2; }
 }
 
-/* CARD */
+/* 🧑‍🤝‍🧑 การ์ด */
 .container {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 50px;
+  display:flex;
+  justify-content:center;
+  gap:40px;
+  margin-top:50px;
 }
 
 .card {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 25px;
-  margin: 15px;
-  width: 220px;
-  transition: 0.4s;
-  box-shadow: 0 0 20px rgba(255,255,255,0.05);
+  background:#111;
+  padding:20px;
+  border-radius:20px;
+  text-align:center;
+  width:150px;
+  transition:0.3s;
 }
 
 .card:hover {
-  transform: translateY(-10px) scale(1.05);
-  box-shadow: 0 0 40px rgba(108,76,255,0.6);
+  transform:scale(1.1);
 }
 
-/* IMAGE */
 .card img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  transition: 0.4s;
+  width:80px;
+  border-radius:50%;
 }
 
-.card:hover img {
-  transform: scale(1.2) rotate(5deg);
-}
-
-/* BUTTON */
 button {
-  margin: 5px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-}
-
-.view {
-  background: white;
-  color: black;
+  margin-top:10px;
+  padding:5px 10px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
 }
 
 .fb {
-  background: #1877f2;
-  color: white;
+  background:#1877f2;
+  color:white;
 }
 
-/* PROFILE */
-.profile {
-  display:none;
-  margin: 30px auto;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  padding: 20px;
-  width: 300px;
-  border-radius: 20px;
+/* 📦 popup */
+.popup {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%) scale(0);
+  background:#111;
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+  transition:0.3s;
+  z-index:10;
+  box-shadow:0 0 30px #8a2be2;
+}
+
+.popup img {
+  width:100px;
+  border-radius:50%;
+  margin-bottom:10px;
+}
+
+.popup.active {
+  transform:translate(-50%, -50%) scale(1);
+}
+
+/* ✨ เมาส์ glow */
+.cursor {
+  position:fixed;
+  width:100px;
+  height:100px;
+  background:radial-gradient(circle, rgba(138,43,226,0.5), transparent);
+  pointer-events:none;
+  border-radius:50%;
+  transform:translate(-50%, -50%);
 }
 </style>
-
 </head>
 
 <body>
 
-<h1>CERIDWEN</h1>
+<canvas id="bg"></canvas>
+
+<div class="cursor" id="cursor"></div>
+
+<h1 class="logo">CERIDWEN</h1>
 
 <div class="container">
 
   <div class="card">
     <img src="https://i.pravatar.cc/100?img=1">
     <h3>Bank</h3>
-    <button class="view" onclick="showProfile('Bank','Leader','สายบุก')">โปรไฟล์</button>
-    <a href="https://facebook.com/" target="_blank">
+    <button onclick="openProfile('Bank','Leader','นักรบแห่ง CERIDWEN','https://i.pravatar.cc/100?img=1')">โปรไฟล์</button>
+    <a href="https://facebook.com" target="_blank">
       <button class="fb">Facebook</button>
     </a>
   </div>
@@ -129,45 +139,90 @@ button {
   <div class="card">
     <img src="https://i.pravatar.cc/100?img=2">
     <h3>Mix</h3>
-    <button class="view" onclick="showProfile('Mix','Support','สายซัพ')">โปรไฟล์</button>
-    <a href="https://facebook.com/" target="_blank">
+    <button onclick="openProfile('Mix','Support','สายซัพโคตรโหด','https://i.pravatar.cc/100?img=2')">โปรไฟล์</button>
+    <a href="https://facebook.com" target="_blank">
       <button class="fb">Facebook</button>
     </a>
   </div>
 
 </div>
 
-<div id="profileBox" class="profile"></div>
+<!-- 📦 Popup -->
+<div id="popup" class="popup" onclick="closeProfile()"></div>
 
-<script>
-function showProfile(name, role, desc){
-  document.getElementById("profileBox").style.display = "block";
-  document.getElementById("profileBox").innerHTML = `
-    <h2>${name}</h2>
-    <p>ตำแหน่ง: ${role}</p>
-    <p>${desc}</p>
-</script>
+<!-- 🔊 เพลง -->
 <audio id="bgmusic" autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
-  <script>
-let music = document.getElementById("bgmusic");
-music.volume = 0;
 
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    music.muted = false;
-    let vol = 0;
-    let fade = setInterval(() => {
-      if (vol < 1) {
-        vol += 0.05;
-        music.volume = vol;
-      } else {
-        clearInterval(fade);
-      }
-    }, 200);
-  }, 1000);
+<script>
+
+/* 🎵 เล่นเพลงเนียน */
+document.body.addEventListener("click", () => {
+  document.getElementById("bgmusic").play();
 });
+
+/* 📦 popup */
+function openProfile(name, role, desc, img) {
+  const popup = document.getElementById("popup");
+  popup.innerHTML = `
+    <img src="${img}">
+    <h2>${name}</h2>
+    <p>${role}</p>
+    <p>${desc}</p>
+  `;
+  popup.classList.add("active");
+}
+
+function closeProfile() {
+  document.getElementById("popup").classList.remove("active");
+}
+
+/* ✨ เมาส์ glow */
+const cursor = document.getElementById("cursor");
+document.addEventListener("mousemove", e => {
+  cursor.style.left = e.clientX + "px";
+  cursor.style.top = e.clientY + "px";
+});
+
+/* 🌌 particle */
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+for(let i=0;i<100;i++){
+  particles.push({
+    x:Math.random()*canvas.width,
+    y:Math.random()*canvas.height,
+    r:Math.random()*2,
+    dx:Math.random()-0.5,
+    dy:Math.random()-0.5
+  });
+}
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  particles.forEach(p=>{
+    p.x+=p.dx;
+    p.y+=p.dy;
+
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle="white";
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
 </script>
-<body>
+
+</body>
 </html>
