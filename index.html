@@ -146,11 +146,28 @@ function showProfile(name, role, desc){
     <h2>${name}</h2>
     <p>ตำแหน่ง: ${role}</p>
     <p>${desc}</p>
-  `;
-}
 </script>
 <audio id="bgmusic" autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
-<body onclick="document.getElementById('bgmusic').play()">
+  <script>
+let music = document.getElementById("bgmusic");
+music.volume = 0;
+
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    music.muted = false;
+    let vol = 0;
+    let fade = setInterval(() => {
+      if (vol < 1) {
+        vol += 0.05;
+        music.volume = vol;
+      } else {
+        clearInterval(fade);
+      }
+    }, 200);
+  }, 1000);
+});
+</script>
+<body>
 </html>
